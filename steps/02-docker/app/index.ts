@@ -9,6 +9,9 @@ async function getCurrentCount() {
       data: { count: 0 },
     });
   }
+
+  console.log("Current count:", { currentCount });
+
   return currentCount;
 }
 
