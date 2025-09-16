@@ -77,8 +77,11 @@ const server = http.createServer(async (req, res) => {
 });
 
 const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+console.log({ host });
+const port = Number(process.env.PORT);
+console.log({ port });
 
-server.listen(Number(process.env.PORT), host, () => {
+server.listen(port, host, () => {
   const address = server.address();
   if (!address) {
     console.log("Server listening");
@@ -86,7 +89,6 @@ server.listen(Number(process.env.PORT), host, () => {
   }
 
   console.log({ address });
-  const url =
-    typeof address === "string" ? address : `http://${host}:${address.port}`;
+  const url = typeof address === "string" ? address : `http://${host}:${port}`;
   console.log(`Server listening at ${url}`);
 });
