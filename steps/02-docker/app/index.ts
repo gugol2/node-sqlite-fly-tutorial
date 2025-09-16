@@ -29,31 +29,30 @@ async function parseFormBody(req: http.IncomingMessage) {
   return params;
 }
 
-const server = http
-  .createServer(async (req, res) => {
-    console.log(`${req.method} ${req.url}`);
+const server = http.createServer(async (req, res) => {
+  console.log(`${req.method} ${req.url}`);
 
-    switch (`${req.method} ${req.url}`) {
-      case "POST /": {
-        const params = await parseFormBody(req);
-        const intent = params.get("intent");
-        const currentCount = await getCurrentCount();
-        if (intent !== "increment" && intent !== "decrement") {
-          return res.end("Invalid intent");
-        }
-        await prisma.count.update({
-          where: { id: currentCount.id },
-          data: { count: { [intent]: 1 } },
-        });
-        res.writeHead(302, { Location: "/" });
-        res.end();
-        break;
+  switch (`${req.method} ${req.url}`) {
+    case "POST /": {
+      const params = await parseFormBody(req);
+      const intent = params.get("intent");
+      const currentCount = await getCurrentCount();
+      if (intent !== "increment" && intent !== "decrement") {
+        return res.end("Invalid intent");
       }
-      case "GET /": {
-        let currentCount = await getCurrentCount();
-        res.setHeader("Content-Type", "text/html");
-        res.writeHead(200);
-        res.end(/* html */ `
+      await prisma.count.update({
+        where: { id: currentCount.id },
+        data: { count: { [intent]: 1 } },
+      });
+      res.writeHead(302, { Location: "/" });
+      res.end();
+      break;
+    }
+    case "GET /": {
+      let currentCount = await getCurrentCount();
+      res.setHeader("Content-Type", "text/html");
+      res.writeHead(200);
+      res.end(/* html */ `
 <html>
   <head>
     <title>Demo App</title>
@@ -68,23 +67,26 @@ const server = http
   </body>
 </html>
         `);
-        break;
-      }
-      default: {
-        res.writeHead(404);
-        return res.end("Not found");
-      }
+      break;
     }
-  })
-  .listen(process.env.PORT, () => {
-    const address = server.address();
-    if (!address) {
-      console.log("Server listening");
-      return;
+    default: {
+      res.writeHead(404);
+      return res.end("Not found");
     }
-    const url =
-      typeof address === "string"
-        ? address
-        : `http://localhost:${address.port}`;
-    console.log(`Server listening at ${url}`);
-  });
+  }
+});
+
+const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+
+server.listen(Number(process.env.PORT), host, () => {
+  const address = server.address();
+  if (!address) {
+    console.log("Server listening");
+    return;
+  }
+
+  console.log({ address });
+  const url =
+    typeof address === "string" ? address : `http://${host}:${address.port}`;
+  console.log(`Server listening at ${url}`);
+});
