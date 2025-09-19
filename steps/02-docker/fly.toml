@@ -33,7 +33,17 @@ primary_region = 'cdg'
   method = "GET"
   timeout = "5s"
   path = "/"
-  restart_limit = 3
+  restart_limit = 0
+  tls_skip_verify = false
+  [http_service.checks.headers]
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/healthcheck"
+  restart_limit = 0
   tls_skip_verify = false
   [http_service.checks.headers]
 

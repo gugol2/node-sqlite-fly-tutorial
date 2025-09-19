@@ -48,6 +48,21 @@ const server = http.createServer(async (req, res) => {
       res.end();
       break;
     }
+
+    case "GET /healthcheck": {
+      try {
+        await getCurrentCount();
+        res.writeHead(200);
+        return res.end("OK");
+      } catch (error) {
+        console.error("Healthcheck failed:", error);
+        res.writeHead(500);
+        return res.end("Internal Server Error");
+      } finally {
+        break;
+      }
+    }
+
     case "GET /": {
       let currentCount = await getCurrentCount();
       res.setHeader("Content-Type", "text/html");
